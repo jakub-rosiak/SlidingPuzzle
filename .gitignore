@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtualenv
+venv/
+env/
+.virtualenv/
+virtualenv/
+
+# PyCharm
+.idea/
+
+# Distribution / packaging
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Test / coverage reports
+*.tox/
+*.nox/
+.coverage/
+nosetests.xml
+*.coverage
+*.hypothesis/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDEs and system files
+.DS_Store
+Thumbs.db
