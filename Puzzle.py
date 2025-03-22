@@ -53,3 +53,11 @@ class Puzzle:
         for row in self.grid:
             print(" ".join(map(str, row)))
         print()
+
+    def __eq__(self, other):
+        if isinstance(other, Puzzle):
+            return self.grid == other.grid
+        return False
+
+    def __hash__(self):
+        return hash(tuple(tuple(row) for row in self.grid))
