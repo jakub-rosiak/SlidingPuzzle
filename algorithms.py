@@ -40,6 +40,11 @@ def bfs(puzzle, move_order):
     return None
 
 def dfs(puzzle, move_order, visited=None, parent_map=None, depth=0, limit=20):
+    if visited is None:
+        visited = {}
+
+    if parent_map is None:
+        parent_map = {}
 
     if puzzle.is_solved():
         return [puzzle]
@@ -49,10 +54,10 @@ def dfs(puzzle, move_order, visited=None, parent_map=None, depth=0, limit=20):
 
     current_state = tuple(map(tuple, puzzle.grid))
 
-    if current_state in visited:
+    if current_state in visited and visited[current_state] <= depth:
         return None
 
-    visited.add(current_state)
+    visited[current_state] = depth
 
     for move in move_order:
         new_state = Puzzle([row[:] for row in puzzle.grid])
@@ -69,7 +74,7 @@ def dfs(puzzle, move_order, visited=None, parent_map=None, depth=0, limit=20):
 
         if move_result is not None:
             new_state_tuple = tuple(map(tuple, new_state.grid))
-            if new_state_tuple not in visited:
+            if new_state_tuple not in visited or visited[new_state_tuple] > depth + 1:
                 parent_map[new_state_tuple] = (current_state, move)
                 result = dfs(new_state, move_order, visited, parent_map, depth + 1, limit)
                 if result is not None:
@@ -87,5 +92,3 @@ def reconstruct_solution(puzzle, goal, parent_map):
 
     solution.reverse()
     return solution
-
-
