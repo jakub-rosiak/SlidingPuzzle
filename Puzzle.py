@@ -44,6 +44,18 @@ class Puzzle:
             return 'D'
         return None
 
+    def move(self, move):
+        match move:
+            case "L":
+                return self.move_left()
+            case "R":
+                return self.move_right()
+            case "U":
+                return self.move_up()
+            case "D":
+                return self.move_down()
+        return None
+
     def is_solved(self):
         expected = list(range(1, self.height * self.width)) + [0]
         flat_grid = [num for row in self.grid for num in row]
@@ -54,10 +66,5 @@ class Puzzle:
             print(" ".join(map(str, row)))
         print()
 
-    def __eq__(self, other):
-        if isinstance(other, Puzzle):
-            return self.grid == other.grid
-        return False
-
-    def __hash__(self):
-        return hash(tuple(tuple(row) for row in self.grid))
+    def get_goal(self):
+        return list(range(1, self.height * self.width)) + [0]
