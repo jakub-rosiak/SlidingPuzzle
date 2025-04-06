@@ -62,20 +62,9 @@ def main():
 
     with open(statisitcs_file, "w") as file:
         file.write(str(len(solution)) + "\n")
-
-        # Write solution path
         file.write(str(visited) + "\n")
-
-        # Write number of visited states
         file.write(str(checked_count) + '\n')
-
-        # Write max depth if available, otherwise n/d
-        if max_depth is not None:
-            file.write(str(max_depth) + '\n')
-        else:
-            file.write('n/d\n')
-
-        # Write execution time in milliseconds
+        file.write(str(max_depth) + '\n')
         file.write(str(round((time_end - time_start) * 1000, 3)) + '\n')
 
     print(solution)

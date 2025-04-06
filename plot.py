@@ -3,12 +3,8 @@ import re
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 
-
-# Function to parse the filename and extract metadata
 def parse_filename(filename):
-    # Pattern: [width]x[height]_[depth]_[grid_id]_[algorithm]_[move_order]_stats.txt
     pattern = r"(\d+)x(\d+)_(\d+)_(\d+)_(\w+)_(\w+)_stats\.txt"
     match = re.match(pattern, filename)
 
@@ -25,23 +21,15 @@ def parse_filename(filename):
     return None
 
 
-# Function to read the content of a stats file
 def read_stats_file(filepath):
     with open(filepath, 'r') as file:
         lines = file.read().strip().split('\n')
 
     if len(lines) >= 5:
-        # Process solution length, states visited, states processed
         solution_length = int(lines[0])
         states_visited = int(lines[1])
         states_processed = int(lines[2])
-
-        # Handle max_depth which could be 'n/a'
-        try:
-            max_depth = int(lines[3])
-        except ValueError:
-            max_depth = 0  # Keep as string "n/a"
-
+        max_depth = int(lines[3])
         time_ms = float(lines[4])
 
         return {
@@ -55,23 +43,11 @@ def read_stats_file(filepath):
 
 
 def create_plots(plot_directory, df, group_by='algorithm', filter_value=None, filename_prefix=''):
-    """
-    Consolidated plotting function that handles all types of grouping
-
-    Parameters:
-    - plot_directory: Directory to save plots
-    - df: DataFrame containing the data
-    - group_by: Column to group by (default: 'algorithm')
-    - filter_value: Optional filter to apply on 'algorithm' column
-    - filename_prefix: Prefix for the output filenames
-    """
-    # Filter data if needed
     if filter_value:
         filtered_df = df[df['algorithm'] == filter_value]
     else:
         filtered_df = df
 
-    # Define metrics to plot
     metrics = [
         {"column": "solution_length", "label": "Długość rozwiązania"},
         {"column": "states_visited", "label": "Liczba stanów odwiedzonych"},
@@ -80,7 +56,6 @@ def create_plots(plot_directory, df, group_by='algorithm', filter_value=None, fi
         {"column": "time_ms", "label": "Czas trwania (ms)"}
     ]
 
-    # Legend mappings
     legend_labels = {
         'bfs': 'BFS',
         'dfs': 'DFS',
@@ -89,19 +64,16 @@ def create_plots(plot_directory, df, group_by='algorithm', filter_value=None, fi
         'hamm': 'Hamming'
     }
 
-    # Create plots for each metric
     for metric in metrics:
         column = metric["column"]
         ylabel = metric["label"]
 
-        # Group the data
         grouped_data = filtered_df.groupby(['depth', group_by])[column].mean().reset_index()
 
-        # Create and save the plot
-        plt.figure(figsize=(10, 6))
-        sns.barplot(x='depth', y=column, hue=group_by, data=grouped_data)
+        plt.figure(figsize=(7, 6))
+        ax = sns.barplot(x='depth', y=column, hue=group_by, data=grouped_data)
+        sns.set_context("notebook", font_scale=1.1)
 
-        # Apply log scale only in specific cases as in the original code
         if (column in ["states_visited", "states_processed", "time_ms"] and
                 (filter_value is None or filter_value in ['bfs', 'dfs'])):
             plt.yscale('log')
@@ -109,7 +81,6 @@ def create_plots(plot_directory, df, group_by='algorithm', filter_value=None, fi
         plt.xlabel("Głębokość")
         plt.ylabel(ylabel)
 
-        # Update legend labels if available
         if group_by in ['algorithm', 'algorithm_options']:
             handles, labels = plt.gca().get_legend_handles_labels()
             new_labels = [legend_labels.get(label, label) for label in labels]
@@ -117,7 +88,21 @@ def create_plots(plot_directory, df, group_by='algorithm', filter_value=None, fi
         else:
             plt.legend(title=None, loc='upper left')
 
+        if filter_value == 'dfs':
+            ax.legend_.remove()
+
+        match filter_value:
+            case 'bfs':
+                plt.title("BFS")
+            case 'dfs':
+                plt.title("DFS")
+            case 'astr':
+                plt.title("A*")
+            case None:
+                plt.title("Ogółem")
+
         output_filename = f"{plot_directory}/{column}_{filename_prefix}.png"
+        plt.tight_layout()
         plt.savefig(output_filename)
         plt.close()
 
@@ -126,10 +111,8 @@ if __name__ == "__main__":
     data_directory = "./output"
     plot_directory = "./plots"
 
-    # Ensure plot directory exists
     os.makedirs(plot_directory, exist_ok=True)
 
-    # Load and process data
     data_list = []
     for filename in os.listdir(data_directory):
         if filename.endswith('_stats.txt'):
@@ -148,7 +131,6 @@ if __name__ == "__main__":
         print("No valid data files found.")
         exit(0)
 
-    # Create all the plot groups using the consolidated function
     create_plots(plot_directory, df, group_by='algorithm', filename_prefix='general_grouping')
     create_plots(plot_directory, df, group_by='algorithm_options', filter_value='astr',
                  filename_prefix='astar_grouping')
