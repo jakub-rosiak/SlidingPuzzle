@@ -32,3 +32,8 @@ nosetests.xml
 # IDEs and system files
 .DS_Store
 Thumbs.db
+
+input/*.txt
+
+output/*.txt
+plots/*.png
